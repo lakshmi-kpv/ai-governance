@@ -76,7 +76,7 @@ td.barcell { width: 40%; white-space: normal; }
       <tbody id="industries"></tbody>
     </table>
   </div>
-  <p class="note">Shows combined counts only. No names or contact details are collected or displayed. Refreshes every 10 seconds.</p>
+  <p class="note">Shows combined counts only. No names or contact details are collected or displayed. Refreshes every 30 seconds.</p>
 </div>
 
 <script>
@@ -141,7 +141,9 @@ async function load() {
   }
 }
 load();
-setInterval(load, 10000);
+// Refresh every 30 seconds, and pause while the tab is hidden to save Netlify usage
+setInterval(() => { if (!document.hidden) load(); }, 30000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) load(); });
 </script>
 </body>
 </html>
