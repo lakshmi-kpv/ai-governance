@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Governance Results (Live)</title>
+<style>
+:root {
+  --navy: #253B49; --steel: #6287A7; --blue: #008EFF; --violet: #6C6CD0;
+  --bg: #F5F5F7; --card: #FFFFFF; --hair: #E2E6EE; --green: #0FB575;
+  --blue-tint: rgba(0,142,255,0.10);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--navy); font-family: Protipo, Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 16px; line-height: 1.5; }
+.wrap { max-width: 1100px; margin: 0 auto; padding: 24px 16px 48px; }
+h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 4px; }
+h2 { font-size: 20px; font-weight: 600; margin: 32px 0 12px; }
+.meta { color: var(--steel); font-size: 14px; margin-bottom: 20px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+.stat { background: var(--card); border: 1px solid var(--hair); border-radius: 14px; padding: 18px; box-shadow: 0 2px 12px rgba(37,59,73,0.06); }
+.stat-label { font-size: 13px; color: var(--steel); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+.stat-value { font-size: 32px; font-weight: 700; margin-top: 4px; }
+.card { background: var(--card); border: 1px solid var(--hair); border-radius: 14px; box-shadow: 0 2px 12px rgba(37,59,73,0.06); overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 15px; }
+th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--hair); white-space: nowrap; }
+th { font-size: 13px; color: var(--steel); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+tr:last-child td { border-bottom: 0; }
+.early { color: var(--steel); } .developing { color: var(--blue); } .established { color: var(--green); }
+.note { color: var(--steel); font-size: 14px; margin-top: 8px; }
+.error { color: #D93D3D; font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>AI Governance: Live Results</h1>
+  <div class="meta" id="meta">Loading…</div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-label">Submissions</div><div class="stat-value" id="total">0</div></div>
+    <div class="stat"><div class="stat-label">Overall: Early</div><div class="stat-value early" id="ov-early">0</div></div>
+    <div class="stat"><div class="stat-label">Overall: Developing</div><div class="stat-value developing" id="ov-dev">0</div></div>
+    <div class="stat"><div class="stat-label">Overall: Established</div><div class="stat-value established" id="ov-est">0</div></div>
+  </div>
+
+  <h2>By pillar</h2>
+  <div class="card">
+    <table>
+      <thead><tr><th>Pillar</th><th class="num">Early</th><th class="num">Developing</th><th class="num">Established</th><th class="num">Not assessed</th></tr></thead>
+      <tbody id="pillars"></tbody>
+    </table>
+  </div>
+
+  <h2>By question</h2>
+  <div class="card">
+    <table>
+      <thead><tr><th>Question</th><th class="num">Early</th><th class="num">Developing</th><th class="num">Established</th><th class="num">Don't Know</th></tr></thead>
+      <tbody id="questions"></tbody>
+    </table>
+  </div>
+
+  <h2>Industries</h2>
+  <div class="card">
+    <table>
+      <thead><tr><th>Industry</th><th class="num">Submissions</th></tr></thead>
+      <tbody id="industries"></tbody>
+    </table>
+  </div>
+  <p class="note">Shows combined counts only. No names or contact details are collected or displayed. Refreshes every 10 seconds.</p>
+</div>
+
+<script>
+const PILLAR_ORDER = ["Operating Model", "AI Visibility & Inventory", "Risk & Evaluation", "Data, Security & Vendors", "Lifecycle & Operations"];
+const QUESTION_LABELS = [
+  "AI-use policy", "Governance ownership", "Use-case owners", "Escalation route",
+  "Central inventory", "Inventory fields", "Unapproved tool detection", "Inventory updates",
+  "Risk tiering", "Pre-launch testing", "Human oversight", "Change reassessment",
+  "Data protection rules", "Vendor and AI feature review", "Agent permissions",
+  "Post-launch monitoring", "Incident process", "Stopping or restricting systems", "Governance checks"
+];
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const num = (n) => `<td class="num">${n || 0}</td>`;
+
+async function load() {
+  try {
+    const res = await fetch("/api/results", { cache: "no-store" });
+    if (!res.ok) throw new Error("Bad response");
+    const d = await res.json();
+
+    document.getElementById("total").textContent = d.total;
+    document.getElementById("ov-early").textContent = d.overall.Early || 0;
+    document.getElementById("ov-dev").textContent = d.overall.Developing || 0;
+    document.getElementById("ov-est").textContent = d.overall.Established || 0;
+
+    document.getElementById("pillars").innerHTML = PILLAR_ORDER.map((name) => {
+      const c = d.pillars[name] || {};
+      return `<tr><td>${esc(name)}</td>${num(c.Early)}${num(c.Developing)}${num(c.Established)}${num(c["Not assessed"])}</tr>`;
+    }).join("");
+
+    document.getElementById("questions").innerHTML = QUESTION_LABELS.map((label, i) => {
+      const q = d.questions[i] || {};
+      return `<tr><td>Q${i + 1}. ${esc(label)}</td>${num(q.Early)}${num(q.Developing)}${num(q.Established)}${num(q.dk)}</tr>`;
+    }).join("");
+
+    const ind = Object.entries(d.industries).sort((a, b) => b[1] - a[1]);
+    document.getElementById("industries").innerHTML = ind.length
+      ? ind.map(([name, n]) => `<tr><td>${esc(name)}</td>${num(n)}</tr>`).join("")
+      : `<tr><td colspan="2">No submissions yet</td></tr>`;
+
+    document.getElementById("meta").textContent = "Updated " + new Date().toLocaleTimeString();
+  } catch (e) {
+    document.getElementById("meta").innerHTML = '<span class="error">Could not load results. Retrying…</span>';
+  }
+}
+load();
+setInterval(load, 10000);
+</script>
+</body>
+</html>
