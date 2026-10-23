@@ -29,6 +29,15 @@ tr:last-child td { border-bottom: 0; }
 .early { color: var(--steel); } .developing { color: var(--blue); } .established { color: var(--green); }
 .note { color: var(--steel); font-size: 14px; margin-top: 8px; }
 .error { color: #D93D3D; font-size: 14px; }
+.bar { display: flex; height: 14px; border-radius: 999px; overflow: hidden; background: var(--hair); min-width: 160px; }
+.bar span { display: block; height: 100%; }
+.seg-early { background: var(--steel); }
+.seg-dev { background: var(--blue); }
+.seg-est { background: var(--green); }
+.seg-dk { background: #C9D1DC; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--steel); margin: 8px 0 0; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+td.barcell { width: 40%; white-space: normal; }
 </style>
 </head>
 <body>
@@ -44,9 +53,10 @@ tr:last-child td { border-bottom: 0; }
   </div>
 
   <h2>By pillar</h2>
+  <div class="legend"><span><i class="seg-early"></i>Early</span><span><i class="seg-dev"></i>Developing</span><span><i class="seg-est"></i>Established</span></div>
   <div class="card">
     <table>
-      <thead><tr><th>Pillar</th><th class="num">Early</th><th class="num">Developing</th><th class="num">Established</th><th class="num">Not assessed</th></tr></thead>
+      <thead><tr><th>Pillar</th><th>Distribution</th><th class="num">Early</th><th class="num">Developing</th><th class="num">Established</th><th class="num">Not assessed</th></tr></thead>
       <tbody id="pillars"></tbody>
     </table>
   </div>
@@ -54,7 +64,7 @@ tr:last-child td { border-bottom: 0; }
   <h2>By question</h2>
   <div class="card">
     <table>
-      <thead><tr><th>Question</th><th class="num">Early</th><th class="num">Developing</th><th class="num">Established</th><th class="num">Don't Know</th></tr></thead>
+      <thead><tr><th>Question</th><th>Distribution</th><th class="num">Early</th><th class="num">Developing</th><th class="num">Established</th><th class="num">Don't Know</th></tr></thead>
       <tbody id="questions"></tbody>
     </table>
   </div>
@@ -80,6 +90,24 @@ const QUESTION_LABELS = [
 ];
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const num = (n) => `<td class="num">${n || 0}</td>`;
+const bar = (parts) => {
+  const total = parts.reduce((s, p) => s + p.n, 0);
+  if (!total) return '<div class="bar"></div>';
+  return '<div class="bar">' + parts.map((p) =>
+    p.n ? `<span class="${p.cls}" style="width:${(p.n / total * 100).toFixed(1)}%" title="${p.label}: ${p.n}"></span>` : ""
+  ).join("") + '</div>';
+};
+const pillarBar = (c) => bar([
+  { n: c.Early, cls: "seg-early", label: "Early" },
+  { n: c.Developing, cls: "seg-dev", label: "Developing" },
+  { n: c.Established, cls: "seg-est", label: "Established" }
+]);
+const questionBar = (q) => bar([
+  { n: q.Early, cls: "seg-early", label: "Early" },
+  { n: q.Developing, cls: "seg-dev", label: "Developing" },
+  { n: q.Established, cls: "seg-est", label: "Established" },
+  { n: q.dk, cls: "seg-dk", label: "Don't Know" }
+]);
 
 async function load() {
   try {
@@ -94,12 +122,12 @@ async function load() {
 
     document.getElementById("pillars").innerHTML = PILLAR_ORDER.map((name) => {
       const c = d.pillars[name] || {};
-      return `<tr><td>${esc(name)}</td>${num(c.Early)}${num(c.Developing)}${num(c.Established)}${num(c["Not assessed"])}</tr>`;
+      return `<tr><td>${esc(name)}</td><td class="barcell">${pillarBar(c)}</td>${num(c.Early)}${num(c.Developing)}${num(c.Established)}${num(c["Not assessed"])}</tr>`;
     }).join("");
 
     document.getElementById("questions").innerHTML = QUESTION_LABELS.map((label, i) => {
       const q = d.questions[i] || {};
-      return `<tr><td>Q${i + 1}. ${esc(label)}</td>${num(q.Early)}${num(q.Developing)}${num(q.Established)}${num(q.dk)}</tr>`;
+      return `<tr><td>Q${i + 1}. ${esc(label)}</td><td class="barcell">${questionBar(q)}</td>${num(q.Early)}${num(q.Developing)}${num(q.Established)}${num(q.dk)}</tr>`;
     }).join("");
 
     const ind = Object.entries(d.industries).sort((a, b) => b[1] - a[1]);
