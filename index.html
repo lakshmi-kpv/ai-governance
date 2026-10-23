@@ -583,9 +583,9 @@ function submitResults() {
   });
   if (btn) btn.disabled = true;
   if (status) status.textContent = "Submitting…";
-  fetch("/", {
+  fetch("https://formspree.io/f/xbggjnnn", {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    headers: { "Content-Type": "application/x-www-form-urlencoded", "Accept": "application/json" },
     body: body.toString()
   }).then(function (res) {
     if (!res.ok) throw new Error("Submission failed");
