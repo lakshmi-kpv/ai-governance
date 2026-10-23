@@ -288,25 +288,25 @@ const ESTABLISHED_NOTE = "Practices are in place. Keep them current as systems c
 
 // Recommendations per question: [rated Early, rated Developing]
 const REC = [
-  ['Draft and formally approve an AI-use policy that covers permitted uses, prohibited uses, and an exception process.', 'Finalize the AI-use policy, obtain formal approval, and extend it to cover both permitted and prohibited uses.'],
-  ['Name one owner for AI governance and set up a group that includes business, IT, Risk, Legal and Security.', 'Establish a charter that defines the owner’s approval authority and the governance group’s membership across functions.'],
-  ['Assign a named business owner to every AI use case, starting with those already in production.', 'Record each owner’s risk responsibilities and have every residual-risk acceptance signed by someone with written authority.'],
-  ['Document an escalation route for AI disagreements, with a named final decision-maker.', 'Name the final decision-maker for each type of disagreement, and use the escalation route every time.'],
-  ['Create one central list of the AI in use across the organization, starting with a survey of each team.', 'Extend the inventory to every team, and include third-party tools, AI features in existing software and AI agents.'],
-  ['Set a minimum standard for every inventory entry, starting with owner, purpose, data used, provider, status and risk level.', 'Make owner, purpose, data used, model or provider, deployment status and risk level mandatory for every entry, so no field is left blank.'],
-  ['Give staff a simple way to report unapproved tools, and add basic network or expense checks to find them.', 'Run technical checks across all tools, and log and resolve each finding by approving, restricting or blocking it.'],
-  ['Assign a named owner to each inventory entry, and review entries on a set schedule.', 'Trigger an update whenever the model, provider, data access or intended use changes, and record the update date.'],
-  ['Require a risk assessment before any AI use case launches.', 'Tier the review by risk level so higher-risk uses get more safeguards and approvals, and block launch until the review is complete.'],
-  ['Define pre-launch testing for every AI system, starting with performance and risk checks.', 'Set pass criteria for performance and risk, and block launches until critical issues are fixed or formally accepted.'],
-  ['Define a human review point for AI decisions that affect customers, employees or money.', 'Define when a human must step in, and give reviewers documented authority to override or stop a system.'],
-  ['Require a risk review before any change to an AI system goes live.', 'Define which significant changes, such as a new model, new data source, or expanded autonomy, require reassessment before launch.'],
-  ['Publish basic rules on which data may be used with AI tools.', 'Name the restricted data types and approved tools, and back the rules with technical controls such as blocking or DLP.'],
-  ['Require an AI-specific review before any vendor tool or embedded AI feature is used.', 'Apply the AI-specific review to every tool, and confirm training and retention terms are in the contract before use.'],
-  ['Replace broad default permissions with a written, limited permission list for each agent.', 'Test that each agent blocks out-of-scope actions, and review its permission limits on a set schedule.'],
-  ['Set up monitoring for each live system, with a named owner who responds when issues arise.', 'Set written thresholds and a response owner for every metric being tracked.'],
-  ['Establish an AI incident process that covers reporting and escalation.', 'Make investigations consistent and track each corrective action through to closure.'],
-  ['Name a role that can pause or roll back each AI system, and establish a shutdown procedure.', 'Test the shutdown procedure and confirm the named role has the access needed to act.'],
-  ['Schedule regular checks of AI governance processes and safeguards.', 'Track every gap found in these checks to closure and report the results to leadership.']
+  ['Approve an AI-use policy covering permitted and prohibited uses, and publish it to all staff.', 'Formally approve the draft policy and add missing categories, such as acceptable use of AI outputs.'],
+  ['Appoint an accountable AI governance lead and a cross-functional committee.', 'Write a charter that sets the committee’s approval authority and membership.'],
+  ['Assign a named business owner to every AI use case, starting with systems in production.', 'Record each owner’s risk responsibilities, and require signed risk acceptance for residual AI risk.'],
+  ['Document an escalation path for AI disputes that names the final decision-maker.', 'Name a final decision-maker for each escalation type, and log each outcome.'],
+  ['Survey all teams, including staff use of browser-based AI tools, to build a first AI inventory.', 'Extend the inventory to all teams, including third-party models, AI APIs, and AI agents.'],
+  ['Make owner, purpose, data, model or provider, status, and risk level mandatory inventory fields.', 'Block saving an inventory entry until all six mandatory fields are complete.'],
+  ['Create a route for staff to request new AI tools, and check expenses each quarter for unapproved AI services.', 'Monitor network and expense data for unapproved AI services, and log each finding with a decision.'],
+  ['Ask each owner to review their inventory entries every six months.', 'Update the inventory whenever a model, provider, data source, or intended use changes.'],
+  ['Adopt a three-tier AI risk model, such as low, medium, and high, based on impact and autonomy.', 'Set required reviews and approvals for each risk tier, and block launch until they are complete.'],
+  ['Establish pre-launch testing criteria based on each system’s risks, including accuracy, bias, and security where relevant.', 'Write pass criteria for each system, and block launch until critical issues are fixed or formally accepted.'],
+  ['Define which AI decisions need human review before action, and name the reviewers.', 'Document when reviewers must intervene, and give them written authority to override or stop a system.'],
+  ['Require risk reassessment before significant changes to models, data sources, intended use, or agent autonomy.', 'Publish a short list of what counts as a significant AI change, such as a new model or expanded agent permissions.'],
+  ['Publish a data rule that restricts sensitive data from unauthorized use, disclosure, or retention by AI tools.', 'Enforce the data rules with technical controls, such as data loss prevention or blocking unapproved AI services.'],
+  ['Require an AI-specific review before any third-party model, AI API, or embedded AI feature is approved.', 'Apply the AI review to every vendor, and confirm data retention and training terms are in the contract.'],
+  ['Give each AI agent a written list of the data, systems, and actions it may use.', 'Enforce agent permissions technically, and test once a year that agents are blocked from out-of-scope actions.'],
+  ['Set performance and risk thresholds for each live AI system, with a named owner who reviews any breach.', 'Define a response for each threshold breach, such as rolling back a model version, and log the action taken.'],
+  ['Create an AI incident process covering harmful outputs and data leaks through AI tools, with a named owner.', 'Track each corrective action from an AI incident through to closure.'],
+  ['Name a role that can pause or roll back each AI system, including agents, and how to reach it after hours.', 'Test the pause and rollback procedure for each system, including reverting to the previous model version.'],
+  ['Schedule regular reviews of AI governance controls, with a reviewer assigned to each.', 'Track each gap found in these reviews to closure, and report open gaps to leadership quarterly.']
 ];
 
 const OVERALL_TEXT = {
@@ -504,7 +504,6 @@ function renderPillarCard(r) {
     '<div class="prow">' +
     '<div class="pinfo"><span class="picon">' + icon(r.icon) + '</span><span class="pname">' + r.name + '</span>' +
     '<span class="badge ' + cls + '">' + badgeText + '</span></div>' +
-    '<div class="ppct ' + cls + '">' + pctText + '</div>' +
     '</div>' +
     pillarBody(r) +
     extras +
@@ -528,7 +527,7 @@ function renderResults() {
     (S.industry ? '<p class="pnote-extra" style="margin-top:12px">Industry: ' + S.industry + '</p>' : '') +
     '<div class="section-rule" aria-hidden="true"></div>' +
     '<h2>Pillar Breakdown</h2>' +
-    '<p class="pb-caption">Each percentage reflects average maturity, from Early (0%) to Established (100%), based on answered questions. “Don’t Know” responses are excluded from scoring.</p>' +
+    '<p class="pb-caption">Each pillar shows its maturity level based on answered questions. “Don’t Know” responses are excluded from scoring.</p>' +
     '<div class="pcards">' + results.map(renderPillarCard).join("") + '</div>' +
     '<button type="button" class="btn btn-navy" id="submit-btn" data-action="submit"' + (S.submitted ? ' disabled' : '') + '>' + (S.submitted ? 'Results submitted' : 'Submit results') + '</button>' +
     '<p class="pnote-extra" id="submit-status" role="status">' + (S.submitted ? 'Thank you. Your results have been submitted.' : '') + '</p>' +
