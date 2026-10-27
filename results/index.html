@@ -31,10 +31,12 @@ tr:last-child td { border-bottom: 0; }
 .error { color: #D93D3D; font-size: 14px; }
 .bar { display: flex; height: 14px; border-radius: 999px; overflow: hidden; background: var(--hair); min-width: 160px; }
 .bar span { display: block; height: 100%; }
-.seg-early { background: var(--steel); }
-.seg-dev { background: var(--blue); }
-.seg-est { background: var(--green); }
-.seg-dk { background: #C9D1DC; }
+.seg-early { background: #253B49; }
+.seg-dev { background: #8DBEEA; }
+.seg-est { background: #0FB575; }
+.seg-dk { background: #D5DBE3; }
+.legend-inline { display: flex; gap: 12px; flex-wrap: wrap; text-transform: none; letter-spacing: 0; font-size: 12px; font-weight: 400; color: var(--steel); margin-top: 4px; }
+.legend-inline i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
 .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--steel); margin: 8px 0 0; }
 .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
 td.barcell { width: 40%; white-space: normal; }
@@ -53,10 +55,9 @@ td.barcell { width: 40%; white-space: normal; }
   </div>
 
   <h2>By pillar</h2>
-  <div class="legend"><span><i class="seg-early"></i>Early</span><span><i class="seg-dev"></i>Developing</span><span><i class="seg-est"></i>Established</span></div>
   <div class="card">
     <table>
-      <thead><tr><th>Pillar</th><th>Distribution</th><th class="num">Early</th><th class="num">Developing</th><th class="num">Established</th><th class="num">Not assessed</th></tr></thead>
+      <thead><tr><th>Pillar</th><th class="distcol">Distribution<div class="legend-inline"><span><i class="seg-early"></i>Early</span><span><i class="seg-dev"></i>Developing</span><span><i class="seg-est"></i>Established</span></div></th><th class="num">Early</th><th class="num">Developing</th><th class="num">Established</th><th class="num">Not assessed</th></tr></thead>
       <tbody id="pillars"></tbody>
     </table>
   </div>
@@ -64,7 +65,7 @@ td.barcell { width: 40%; white-space: normal; }
   <h2>By question</h2>
   <div class="card">
     <table>
-      <thead><tr><th>Question</th><th>Distribution</th><th class="num">Early</th><th class="num">Developing</th><th class="num">Established</th><th class="num">Don't Know</th></tr></thead>
+      <thead><tr><th>Question</th><th class="distcol">Distribution<div class="legend-inline"><span><i class="seg-early"></i>Early</span><span><i class="seg-dev"></i>Developing</span><span><i class="seg-est"></i>Established</span></div></th><th class="num">Early</th><th class="num">Developing</th><th class="num">Established</th><th class="num">Don't Know</th></tr></thead>
       <tbody id="questions"></tbody>
     </table>
   </div>
@@ -136,7 +137,10 @@ async function load() {
       return `<tr><td>${esc(name)}</td><td class="barcell">${pillarBar(c)}</td>${num(c.Early)}${num(c.Developing)}${num(c.Established)}${num(c["Not assessed"])}</tr>`;
     }).join("");
 
-    document.getElementById("questions").innerHTML = QUESTION_LABELS.map((label, i) => {
+    document.getElementById("questions").innerHTML = QUESTION_LABELS.map((_, i) => i)
+      .sort((a, b) => (((d.questions[b] || {}).Early || 0) - ((d.questions[a] || {}).Early || 0)) || (((d.questions[b] || {}).Developing || 0) - ((d.questions[a] || {}).Developing || 0)))
+      .map((i) => {
+      const label = QUESTION_LABELS[i];
       const q = d.questions[i] || {};
       return `<tr><td>Q${i + 1}. ${esc(label)}</td><td class="barcell">${questionBar(q)}</td>${num(q.Early)}${num(q.Developing)}${num(q.Established)}${num(q.dk)}</tr>`;
     }).join("");
