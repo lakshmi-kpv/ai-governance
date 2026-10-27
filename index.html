@@ -388,6 +388,8 @@ function retake() {
   S.a = Array(Q.length).fill(null);
   S.industry = null;
   S.submitted = false;
+  S.submitting = false;
+  S.submitFailed = false;
   go("intro", 0);
 }
 
@@ -529,8 +531,7 @@ function renderResults() {
     '<h2>Pillar Breakdown</h2>' +
     '<p class="pb-caption">Each pillar shows its maturity level based on answered questions. “Don’t Know” responses are excluded from scoring.</p>' +
     '<div class="pcards">' + results.map(renderPillarCard).join("") + '</div>' +
-    '<button type="button" class="btn btn-navy" id="submit-btn" data-action="submit"' + (S.submitted ? ' disabled' : '') + '>' + (S.submitted ? 'Results submitted' : 'Submit results') + '</button>' +
-    '<p class="pnote-extra" id="submit-status" role="status">' + (S.submitted ? 'Thank you. Your results have been submitted.' : '') + '</p>' +
+    '<p class="pnote-extra" role="status">' + (S.submitted ? 'Thank you. Your results have been submitted.' : (S.submitFailed ? 'Submission failed. <button type="button" class="link-btn" data-action="retry">Try again</button>' : 'Saving your results…')) + '</p>' +
     '<button type="button" class="btn btn-blue" data-action="retake">Retake assessment</button>' +
     '</div>';
 }
@@ -553,38 +554,30 @@ function renderIndustry() {
 }
 
 function submitResults() {
-  if (S.submitted) return;
-  const btn = document.getElementById("submit-btn");
-  const status = document.getElementById("submit-status");
+  if (S.submitted || S.submitting) return;
+  S.submitting = true;
+  S.submitFailed = false;
   const results = scorePillars();
   const overall = overallBand(results) || "Not assessed";
-  const labels = ["", "Early", "Developing", "Established"];
-  const answers = Q.map(function (_, i) {
-    const v = S.a[i];
-    return "Q" + (i + 1) + "=" + (v === "dk" ? "Don't Know" : (labels[v] || "Unanswered"));
-  }).join("; ");
-  const pillars = results.map(function (r) {
-    return r.name + "=" + (r.assessed ? r.band + " " + r.pct + "%" : "Not assessed");
-  }).join("; ");
   const body = JSON.stringify({
     industry: S.industry || "",
     overall: overall,
     pillars: results.map(function (r) { return { name: r.name, band: r.assessed ? r.band : "Not assessed" }; }),
     answers: S.a.map(function (v) { return v === "dk" ? "dk" : (typeof v === "number" ? v : null); })
   });
-  if (btn) btn.disabled = true;
-  if (status) status.textContent = "Submitting…";
-  fetch("/api/submit", {
+  fetch("https://script.google.com/macros/s/AKfycbzYZRYSTmUw1aDFYDSKugi6QzLmxNe12hMK2_tnih7SeL_zpC6RAbqs20EKFrsR9kPR/exec", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    mode: "no-cors",
+    headers: { "Content-Type": "text/plain" },
     body: body
-  }).then(function (res) {
-    if (!res.ok) throw new Error("Submission failed");
+  }).then(function () {
+    S.submitting = false;
     S.submitted = true;
     render();
   }).catch(function () {
-    if (btn) btn.disabled = false;
-    if (status) status.textContent = "Submission failed. Please try again.";
+    S.submitting = false;
+    S.submitFailed = true;
+    render();
   });
 }
 
@@ -595,6 +588,7 @@ function render() {
   else if (S.screen === "industry") html = renderIndustry();
   else html = renderResults();
   app.innerHTML = html;
+  if (S.screen === "results" && !S.submitted && !S.submitting && !S.submitFailed) submitResults();
 }
 
 app.addEventListener("click", function (e) {
@@ -615,7 +609,8 @@ app.addEventListener("click", function (e) {
     back();
   } else if (action === "backq") {
     go("q", Q.length - 1);
-  } else if (action === "submit") {
+  } else if (action === "retry") {
+    S.submitFailed = false;
     submitResults();
   } else if (action === "retake") {
     retake();
