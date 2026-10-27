@@ -33,6 +33,7 @@ tr:last-child td { border-bottom: 0; }
 .bar span { display: flex; align-items: center; justify-content: center; height: 100%; font-size: 12px; font-weight: 600; color: #FFFFFF; overflow: hidden; white-space: nowrap; }
 .barcell .bar { height: 22px; width: 100%; min-width: 0; }
 .seg-dev { color: #253B49 !important; }
+.seg-dk { color: #253B49 !important; }
 .seg-early { background: #253B49; }
 .seg-dev { background: #8DBEEA; }
 .seg-est { background: #0FB575; }
@@ -65,10 +66,10 @@ td.barcell { width: 40%; white-space: normal; }
     <div id="overall-bar" class="barcell" style="margin-top:10px"></div>
       </div>
   <h2>By pillar</h2>
-  <p class="note" style="margin:-4px 0 12px">Each bar shows how many submissions rated that pillar Early, Developing, or Established. "Not assessed" means every question in that pillar was marked Don't know, so no pillar rating is given.</p>
+  <p class="note" style="margin:-4px 0 12px">Each bar shows how submissions rated that pillar. Grey marks "Not assessed": every question in that pillar was marked Don't know. "Not assessed" means every question in that pillar was marked Don't know, so no pillar rating is given.</p>
   <div class="card">
     <table>
-      <thead><tr><th>Pillar</th><th class="distcol">Distribution<div class="legend-inline"><span><i class="seg-early"></i>Early</span><span><i class="seg-dev"></i>Developing</span><span><i class="seg-est"></i>Established</span></div></th><th class="num">Submissions</th><th class="num">Not assessed</th></tr></thead>
+      <thead><tr><th>Pillar</th><th class="distcol">Distribution<div class="legend-inline"><span><i class="seg-early"></i>Early</span><span><i class="seg-dev"></i>Developing</span><span><i class="seg-est"></i>Established</span><span><i class="seg-dk"></i>Not assessed</span></div></th></tr></thead>
       <tbody id="pillars"></tbody>
     </table>
   </div>
@@ -137,7 +138,8 @@ const bar = (parts) => {
 const pillarBar = (c) => pctBar([
   { n: c.Early, cls: "seg-early", label: "Early" },
   { n: c.Developing, cls: "seg-dev", label: "Developing" },
-  { n: c.Established, cls: "seg-est", label: "Established" }
+  { n: c.Established, cls: "seg-est", label: "Established" },
+  { n: c["Not assessed"], cls: "seg-dk", label: "Not assessed" }
 ]);
 const questionBar = (q) => bar([
   { n: q.Early, cls: "seg-early", label: "Early" },
@@ -176,7 +178,7 @@ async function load() {
     document.getElementById("pillars").innerHTML = PILLAR_ORDER.map((name) => {
       const c = d.pillars[name] || {};
       const rated = (c.Early || 0) + (c.Developing || 0) + (c.Established || 0);
-      return `<tr><td>${esc(name)}</td><td class="barcell">${pillarBar(c)}</td>${num(rated)}${num(c["Not assessed"])}</tr>`;
+      return `<tr><td>${esc(name)}</td><td class="barcell">${pillarBar(c)}</td>${num(c["Not assessed"])}</tr>`;
     }).join("");
 
     const PILLAR_OF_Q = [0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,4,4,4,4];
