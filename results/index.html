@@ -66,7 +66,7 @@ td.barcell { width: 40%; white-space: normal; }
     <div id="overall-bar" class="barcell" style="margin-top:10px"></div>
       </div>
   <h2>By pillar</h2>
-  <p class="note" style="margin:-4px 0 12px">Each bar shows how submissions rated that pillar. Grey marks "Not assessed": every question in that pillar was marked Don't know. "Not assessed" means every question in that pillar was marked Don't know, so no pillar rating is given.</p>
+  <p class="note" style="margin:-4px 0 12px">Each bar shows how submissions rated that pillar. Grey marks "Not assessed": every question in that pillar was marked Don't know, so no pillar rating is given.</p>
   <div class="card">
     <table>
       <thead><tr><th>Pillar</th><th class="distcol">Distribution<div class="legend-inline"><span><i class="seg-early"></i>Early</span><span><i class="seg-dev"></i>Developing</span><span><i class="seg-est"></i>Established</span><span><i class="seg-dk"></i>Not assessed</span></div></th></tr></thead>
@@ -178,7 +178,7 @@ async function load() {
     document.getElementById("pillars").innerHTML = PILLAR_ORDER.map((name) => {
       const c = d.pillars[name] || {};
       const rated = (c.Early || 0) + (c.Developing || 0) + (c.Established || 0);
-      return `<tr><td>${esc(name)}</td><td class="barcell">${pillarBar(c)}</td>${num(c["Not assessed"])}</tr>`;
+      return `<tr><td>${esc(name)}</td><td class="barcell">${pillarBar(c)}</td></tr>`;
     }).join("");
 
     const PILLAR_OF_Q = [0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,4,4,4,4];
