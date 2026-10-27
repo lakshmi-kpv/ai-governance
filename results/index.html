@@ -60,14 +60,14 @@ td.barcell { width: 40%; white-space: normal; }
 
   <div class="card" style="margin-top:12px;padding:16px 18px">
     <div class="stat-label">Overall rating across submissions</div>
+    <div class="legend-inline" style="margin-top:8px"><span><i class="seg-early"></i>Early</span><span><i class="seg-dev"></i>Developing</span><span><i class="seg-est"></i>Established</span></div>
     <div id="overall-bar" class="barcell" style="margin-top:10px"></div>
-    <div id="overall-share" class="note" style="margin-top:8px"></div>
-  </div>
+      </div>
   <h2>By pillar</h2>
   <p class="note" style="margin:-4px 0 12px">Each bar shows how many submissions rated that pillar Early, Developing, or Established. "Not assessed" means every question in that pillar was marked Don't know, so no pillar rating is given.</p>
   <div class="card">
     <table>
-      <thead><tr><th>Pillar</th><th class="distcol">Distribution<div class="legend-inline"><span><i class="seg-early"></i>Early</span><span><i class="seg-dev"></i>Developing</span><span><i class="seg-est"></i>Established</span></div></th><th class="num">Not assessed</th></tr></thead>
+      <thead><tr><th>Pillar</th><th class="distcol">Distribution<div class="legend-inline"><span><i class="seg-early"></i>Early</span><span><i class="seg-dev"></i>Developing</span><span><i class="seg-est"></i>Established</span></div></th><th class="num">Submissions</th><th class="num">Not assessed</th></tr></thead>
       <tbody id="pillars"></tbody>
     </table>
   </div>
@@ -102,6 +102,16 @@ const QUESTION_LABELS = [
 ];
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const num = (n) => `<td class="num">${n || 0}</td>`;
+const pctBar = (parts) => {
+  const total = parts.reduce((s, p) => s + (p.n || 0), 0);
+  if (!total) return '<div class="bar"></div>';
+  return '<div class="bar">' + parts.map((p) => {
+    if (!p.n) return "";
+    const share = p.n / total * 100;
+    const label = share >= 8 ? Math.round(share) + "%" : "";
+    return `<span class="${p.cls}" style="width:${share.toFixed(1)}%" title="${p.label}: ${p.n} of ${total}">${label}</span>`;
+  }).join("") + '</div>';
+};
 const bar = (parts) => {
   const total = parts.reduce((s, p) => s + p.n, 0);
   if (!total) return '<div class="bar"></div>';
@@ -109,7 +119,7 @@ const bar = (parts) => {
     p.n ? `<span class="${p.cls}" style="width:${(p.n / total * 100).toFixed(1)}%" title="${p.label}: ${p.n}">${p.n}</span>` : ""
   ).join("") + '</div>';
 };
-const pillarBar = (c) => bar([
+const pillarBar = (c) => pctBar([
   { n: c.Early, cls: "seg-early", label: "Early" },
   { n: c.Developing, cls: "seg-dev", label: "Developing" },
   { n: c.Established, cls: "seg-est", label: "Established" }
@@ -142,20 +152,16 @@ async function load() {
     document.getElementById("ov-early").textContent = d.overall.Early || 0;
     document.getElementById("ov-dev").textContent = d.overall.Developing || 0;
     document.getElementById("ov-est").textContent = d.overall.Established || 0;
-    document.getElementById("overall-bar").innerHTML = bar([
+    document.getElementById("overall-bar").innerHTML = pctBar([
       { n: d.overall.Early, cls: "seg-early", label: "Early" },
       { n: d.overall.Developing, cls: "seg-dev", label: "Developing" },
       { n: d.overall.Established, cls: "seg-est", label: "Established" }
     ]);
-    const oTotal = (d.overall.Early || 0) + (d.overall.Developing || 0) + (d.overall.Established || 0);
-    const share = (n) => oTotal ? Math.round((n || 0) / oTotal * 100) : 0;
-    document.getElementById("overall-share").textContent = oTotal
-      ? share(d.overall.Early) + "% Early, " + share(d.overall.Developing) + "% Developing, " + share(d.overall.Established) + "% Established (" + oTotal + " rated submissions)"
-      : "No rated submissions yet";
 
     document.getElementById("pillars").innerHTML = PILLAR_ORDER.map((name) => {
       const c = d.pillars[name] || {};
-      return `<tr><td>${esc(name)}</td><td class="barcell">${pillarBar(c)}</td>${num(c["Not assessed"])}</tr>`;
+      const rated = (c.Early || 0) + (c.Developing || 0) + (c.Established || 0);
+      return `<tr><td>${esc(name)}</td><td class="barcell">${pillarBar(c)}</td>${num(rated)}${num(c["Not assessed"])}</tr>`;
     }).join("");
 
     const PILLAR_OF_Q = [0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,4,4,4,4];
