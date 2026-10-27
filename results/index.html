@@ -108,12 +108,23 @@ const questionBar = (q) => bar([
   { n: q.Established, cls: "seg-est", label: "Established" },
   { n: q.dk, cls: "seg-dk", label: "Don't Know" }
 ]);
+const LEGEND = '<div class="legend"><span><i class="seg-early"></i>Early</span><span><i class="seg-dev"></i>Developing</span><span><i class="seg-est"></i>Established</span><span><i class="seg-dk"></i>Don\'t Know</span></div>';
+
+const API_URL = "https://script.google.com/macros/s/AKfycbzYZRYSTmUw1aDFYDSKugi6QzLmxNe12hMK2_tnih7SeL_zpC6RAbqs20EKFrsR9kPR/exec";
+function jsonp(url) {
+  return new Promise(function (resolve, reject) {
+    const name = "cb_" + Math.random().toString(36).slice(2);
+    const s = document.createElement("script");
+    window[name] = function (data) { delete window[name]; s.remove(); resolve(data); };
+    s.onerror = function () { delete window[name]; s.remove(); reject(new Error("load failed")); };
+    s.src = url + (url.indexOf("?") === -1 ? "?" : "&") + "callback=" + name;
+    document.head.appendChild(s);
+  });
+}
 
 async function load() {
   try {
-    const res = await fetch("/api/results", { cache: "no-store" });
-    if (!res.ok) throw new Error("Bad response");
-    const d = await res.json();
+    const d = await jsonp(API_URL);
 
     document.getElementById("total").textContent = d.total;
     document.getElementById("ov-early").textContent = d.overall.Early || 0;
