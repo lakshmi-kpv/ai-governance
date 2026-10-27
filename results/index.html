@@ -31,13 +31,14 @@ tr:last-child td { border-bottom: 0; }
 .error { color: #D93D3D; font-size: 14px; }
 .bar { display: flex; height: 14px; border-radius: 999px; overflow: hidden; background: var(--hair); min-width: 160px; }
 .bar span { display: flex; align-items: center; justify-content: center; height: 100%; font-size: 12px; font-weight: 600; color: #FFFFFF; overflow: hidden; white-space: nowrap; }
-.barcell .bar { height: 22px; }
+.barcell .bar { height: 22px; width: 100%; min-width: 0; }
 .seg-dev { color: #253B49 !important; }
 .seg-early { background: #253B49; }
 .seg-dev { background: #8DBEEA; }
 .seg-est { background: #0FB575; }
 .seg-dk { background: #D5DBE3; }
 .legend-inline { display: flex; gap: 12px; flex-wrap: wrap; text-transform: none; letter-spacing: 0; font-size: 12px; font-weight: 400; color: var(--steel); margin-top: 4px; }
+.qtext { white-space: normal; min-width: 260px; line-height: 1.4; }
 .grouprow td { background: #EEF1F5; font-weight: 700; color: var(--navy); font-size: 14px; }
 .heat { font-weight: 600; min-width: 90px; }
 .legend-inline i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
@@ -73,7 +74,7 @@ td.barcell { width: 40%; white-space: normal; }
   </div>
 
   <h2>By question</h2>
-  <p class="note" style="margin:-4px 0 12px">Grouped by pillar. Darker cells mean more answers in that category.</p>
+  <p class="note" style="margin:-4px 0 12px">Grouped by pillar. Darker cells mean more answers in that category. A pillar is Not assessed only when every one of its questions is Don't know.</p>
   <div class="card">
     <table>
       <thead><tr><th>Question</th><th class="num">Early</th><th class="num">Developing</th><th class="num">Established</th><th class="num">Don't Know</th></tr></thead>
@@ -94,11 +95,25 @@ td.barcell { width: 40%; white-space: normal; }
 const PILLARS = ["Operating Model", "AI Visibility & Inventory", "Risk & Evaluation", "Data, Security & Vendors", "Lifecycle & Operations"];
 const PILLAR_ORDER = ["Operating Model", "AI Visibility & Inventory", "Risk & Evaluation", "Data, Security & Vendors", "Lifecycle & Operations"];
 const QUESTION_LABELS = [
-  "AI-use policy", "Governance ownership", "Use-case owners", "Escalation route",
-  "Central inventory", "Inventory fields", "Unapproved tool detection", "Inventory updates",
-  "Risk tiering", "Pre-launch testing", "Human oversight", "Change reassessment",
-  "Data protection rules", "Vendor and AI feature review", "Agent permissions",
-  "Post-launch monitoring", "Incident process", "Stopping or restricting systems", "Governance checks"
+  "How established is your organization's AI-use policy?",
+  "Is it clear who is responsible for AI governance and who can make decisions?",
+  "Does every AI use case have an owner accountable for its risks?",
+  "Is it clear who makes the final decision when teams disagree about an AI use case?",
+  "Do you have a central inventory of AI being used across your organization?",
+  "Does your AI inventory capture the information needed to manage each use case?",
+  "Can you identify AI tools being used without approval, rather than relying only on employees to report them?",
+  "Is your AI inventory updated when systems or how they're used change?",
+  "Are AI use cases assessed for risk before launch, with higher-risk uses receiving more review?",
+  "Are AI systems tested for performance and risks before they go live?",
+  "When human oversight is needed, is it clear who reviews AI decisions and when they should intervene?",
+  "Are AI risks reassessed when a system's purpose, model, data access or level of autonomy changes?",
+  "Are there rules and safeguards to protect sensitive data when using AI tools?",
+  "Are third-party AI tools and AI features in existing software reviewed for data security and vendor risks before use?",
+  "Are AI agents restricted to approved data, systems and actions?",
+  "Are AI systems monitored after launch, with clear actions when performance or risks cross acceptable limits?",
+  "Is there a clear process for reporting, investigating and resolving AI-related incidents?",
+  "Can your organization quickly stop or restrict an AI system when needed?",
+  "Do you check whether AI governance processes and safeguards are actually working?"
 ];
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const num = (n) => `<td class="num">${n || 0}</td>`;
@@ -178,7 +193,7 @@ async function load() {
       QUESTION_LABELS.forEach(function (label, i) {
         if (PILLAR_OF_Q[i] !== pi) return;
         const q = d.questions[i] || {};
-        qRows += `<tr><td>Q${i + 1}. ${esc(label)}</td>${heatCell(q.Early, "Early", d.total)}${heatCell(q.Developing, "Developing", d.total)}${heatCell(q.Established, "Established", d.total)}${heatCell(q.dk, "dk", d.total)}</tr>`;
+        qRows += `<tr><td class="qtext">Q${i + 1}. ${esc(label)}</td>${heatCell(q.Early, "Early", d.total)}${heatCell(q.Developing, "Developing", d.total)}${heatCell(q.Established, "Established", d.total)}${heatCell(q.dk, "dk", d.total)}</tr>`;
       });
     });
     document.getElementById("questions").innerHTML = qRows;
