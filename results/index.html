@@ -39,8 +39,10 @@ tr:last-child td { border-bottom: 0; }
 .seg-est { background: #0FB575; }
 .seg-dk { background: #D5DBE3; }
 .legend-inline { display: flex; gap: 12px; flex-wrap: wrap; text-transform: none; letter-spacing: 0; font-size: 12px; font-weight: 400; color: var(--steel); margin-top: 4px; }
-.pillar-layout { display: grid; grid-template-columns: 300px 1fr; gap: 20px; align-items: start; }
-@media (max-width: 820px) { .pillar-layout { grid-template-columns: 1fr; } }
+.pillar-layout { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
+.pillar-layout > .card:first-child { flex: 0 0 300px; max-width: 100%; }
+.pillar-layout > div:last-child { flex: 1 1 520px; min-width: 0; }
+.pillar-layout > div:last-child .card { overflow-x: auto; }
 .qtext { white-space: normal; min-width: 260px; line-height: 1.4; }
 .grouprow td { background: #EEF1F5; font-weight: 700; color: var(--navy); font-size: 14px; }
 .heat { font-weight: 600; min-width: 90px; }
