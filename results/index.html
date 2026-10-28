@@ -38,7 +38,7 @@ tr:last-child td { border-bottom: 0; }
 .seg-dev { background: #8DBEEA; }
 .seg-est { background: #0FB575; }
 .seg-dk { background: #D5DBE3; }
-.legend-inline { display: flex; gap: 12px; flex-wrap: wrap; text-transform: none; letter-spacing: 0; font-size: 12px; font-weight: 400; color: var(--steel); margin-top: 4px; }
+.legend-inline { display: flex; gap: 10px; flex-wrap: nowrap; white-space: nowrap; text-transform: none; letter-spacing: 0; font-size: 11px; font-weight: 400; color: var(--steel); margin-top: 4px; }
 .pillar-layout { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
 .pillar-layout > .card:first-child { flex: 0 0 300px; max-width: 100%; }
 .pillar-layout > div:last-child { flex: 1 1 520px; min-width: 0; }
@@ -65,13 +65,13 @@ td.barcell { width: 40%; white-space: normal; }
   </div>
 
   <div style="display:flex;gap:20px;align-items:stretch;flex-wrap:wrap">
-  <div class="card" style="padding:16px 18px;flex:0 0 300px;max-width:100%;display:flex;flex-direction:column">
-    <div class="stat-label">Overall rating across submissions</div>
-    <div id="overall-bar" class="barcell" style="margin-top:10px"></div>
-      <div style="border-top:1px solid var(--hair);margin:20px 0 14px"></div>
-  </div>
-  <div class="card" style="flex:1 1 520px;min-width:0;padding:20px 22px;overflow-x:auto">
-  <h2 style="margin-bottom:6px">By pillar</h2>
+  <div class="card" style="padding:20px 22px;flex:0 0 300px;max-width:100%;display:flex;flex-direction:column">
+    <h2 style="margin:0 0 6px;font-size:20px;font-weight:600;line-height:1.3">Overall rating across submissions</h2>
+    <p class="note" style="margin:0 0 12px">Share of submissions in each overall band.</p>
+    <div id="overall-bar" class="barcell" style="flex:1;display:flex;flex-direction:column;justify-content:center;margin-top:0"></div>
+        </div>
+  <div class="card" style="flex:1 1 520px;min-width:0;padding:20px 22px;overflow-x:auto;display:flex;flex-direction:column">
+  <h2 style="margin:0 0 6px;font-size:20px;font-weight:600;line-height:1.3">By pillar</h2>
   <p class="note" style="margin:0 0 12px">Each bar shows how submissions rated that pillar. Grey marks "Not assessed": every question in that pillar was marked Don't know, so no pillar rating is given.</p>
   <div>
     <table>
@@ -177,7 +177,7 @@ function donut(o) {
   ];
   const total = parts.reduce(function (s, p) { return s + p.n; }, 0);
   if (!total) return '<p class="note">No rated submissions yet</p>';
-  const cx = 90, cy = 90, r = 62, sw = 22, C = 2 * Math.PI * r;
+  const cx = 90, cy = 90, r = 62, sw = 16, C = 2 * Math.PI * r;
   let off = 0;
   let arcs = "", labels = "";
   parts.forEach(function (p) {
@@ -197,7 +197,7 @@ function donut(o) {
     return '<span style="display:inline-flex;align-items:center;gap:6px;font-size:14px;white-space:nowrap"><i style="width:10px;height:10px;border-radius:50%;background:' + p.c + ';display:inline-block"></i>' + p.k + '</span>';
   }).join('<span style="width:14px"></span>');
   return '<svg width="100%" viewBox="0 0 180 180" style="max-width:220px;align-self:center;overflow:visible" aria-hidden="true"><g transform="rotate(-90 90 90)"><circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="#EEF1F5" stroke-width="' + sw + '"/>' + arcs + '</g>' + labels + '</svg>' +
-         '<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:auto;padding-top:10px">' + legend + '</div>';
+         '<div style="display:flex;justify-content:center;gap:14px;margin-top:12px;flex-wrap:nowrap">' + legend + '</div>';
 }
 
 async function load() {
