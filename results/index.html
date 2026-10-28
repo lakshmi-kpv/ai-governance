@@ -64,16 +64,16 @@ td.barcell { width: 40%; white-space: normal; }
     <div class="stat"><div class="stat-label">Established</div><div class="stat-value established" id="ov-est">0</div></div>
   </div>
 
-  <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
-  <div class="card" style="padding:16px 18px;flex:0 0 300px;max-width:100%">
+  <div style="display:flex;gap:20px;align-items:stretch;flex-wrap:wrap">
+  <div class="card" style="padding:16px 18px;flex:0 0 300px;max-width:100%;display:flex;flex-direction:column">
     <div class="stat-label">Overall rating across submissions</div>
     <div id="overall-bar" class="barcell" style="margin-top:10px"></div>
       <div style="border-top:1px solid var(--hair);margin:20px 0 14px"></div>
   </div>
-  <div style="flex:1 1 520px;min-width:0">
+  <div class="card" style="flex:1 1 520px;min-width:0;padding:20px 22px;overflow-x:auto">
   <h2 style="margin-bottom:6px">By pillar</h2>
   <p class="note" style="margin:0 0 12px">Each bar shows how submissions rated that pillar. Grey marks "Not assessed": every question in that pillar was marked Don't know, so no pillar rating is given.</p>
-  <div class="card" style="overflow-x:auto">
+  <div>
     <table>
       <thead><tr><th>Pillar</th><th class="distcol">Distribution<div class="legend-inline"><span><i class="seg-early"></i>Early</span><span><i class="seg-dev"></i>Developing</span><span><i class="seg-est"></i>Established</span><span><i class="seg-dk"></i>Not assessed</span></div></th></tr></thead>
       <tbody id="pillars"></tbody>
@@ -177,24 +177,27 @@ function donut(o) {
   ];
   const total = parts.reduce(function (s, p) { return s + p.n; }, 0);
   if (!total) return '<p class="note">No rated submissions yet</p>';
-  const r = 52, C = 2 * Math.PI * r, sw = 18;
+  const cx = 90, cy = 90, r = 62, sw = 22, C = 2 * Math.PI * r;
   let off = 0;
-  const arcs = parts.filter(function (p) { return p.n; }).map(function (p) {
-    const len = p.n / total * C;
-    const s = '<circle cx="70" cy="70" r="' + r + '" fill="none" stroke="' + p.c + '" stroke-width="' + sw + '" stroke-dasharray="' + len.toFixed(2) + ' ' + (C - len).toFixed(2) + '" stroke-dashoffset="' + (-off).toFixed(2) + '"><title>' + p.k + ': ' + p.n + ' of ' + total + '</title></circle>';
+  let arcs = "", labels = "";
+  parts.forEach(function (p) {
+    if (!p.n) return;
+    const frac = p.n / total;
+    const len = frac * C;
+    arcs += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + p.c + '" stroke-width="' + sw + '" stroke-dasharray="' + len.toFixed(2) + ' ' + (C - len).toFixed(2) + '" stroke-dashoffset="' + (-off).toFixed(2) + '"><title>' + p.k + ': ' + p.n + ' of ' + total + '</title></circle>';
+    // Percentage sits just outside the ring, at the middle of its arc
+    const mid = (off + len / 2) / C * 2 * Math.PI - Math.PI / 2;
+    const rl = r + sw / 2 + 14;
+    const x = cx + rl * Math.cos(mid), y = cy + rl * Math.sin(mid);
+    const anchor = Math.cos(mid) > 0.2 ? "start" : (Math.cos(mid) < -0.2 ? "end" : "middle");
+    labels += '<text x="' + x.toFixed(1) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="' + anchor + '" font-size="13" font-weight="700" fill="#253B49">' + Math.round(frac * 100) + '%</text>';
     off += len;
-    return s;
-  }).join("");
-  // Headline in the centre: the band most submissions landed in
-  const top = parts.reduce(function (a, b) { return b.n > a.n ? b : a; }, parts[0]);
-  const topPct = Math.round(top.n / total * 100);
-  const centre = '<text x="70" y="70" text-anchor="middle" font-size="22" font-weight="700" fill="#253B49">' + topPct + '%</text>' +
-                 '<text x="70" y="88" text-anchor="middle" font-size="11" fill="#6287A7">' + top.k + '</text>';
+  });
   const legend = parts.map(function (p) {
-    const pct = Math.round(p.n / total * 100);
-    return '<div style="display:flex;align-items:center;gap:8px;font-size:14px;white-space:nowrap"><i style="width:10px;height:10px;border-radius:50%;background:' + p.c + ';display:inline-block"></i><span style="width:96px">' + p.k + '</span><strong style="width:40px;text-align:right">' + pct + '%</strong></div>';
-  }).join("");
-  return '<div style="display:inline-flex;align-items:center;gap:24px;flex-wrap:wrap"><svg width="140" height="140" viewBox="0 0 140 140" aria-hidden="true"><g transform="rotate(-90 70 70)"><circle cx="70" cy="70" r="' + r + '" fill="none" stroke="#EEF1F5" stroke-width="' + sw + '"/>' + arcs + '</g>' + centre + '</svg><div style="display:flex;flex-direction:column;gap:8px">' + legend + '</div></div>';
+    return '<span style="display:inline-flex;align-items:center;gap:6px;font-size:14px;white-space:nowrap"><i style="width:10px;height:10px;border-radius:50%;background:' + p.c + ';display:inline-block"></i>' + p.k + '</span>';
+  }).join('<span style="width:14px"></span>');
+  return '<svg width="100%" viewBox="0 0 180 180" style="max-width:220px;align-self:center;overflow:visible" aria-hidden="true"><g transform="rotate(-90 90 90)"><circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="#EEF1F5" stroke-width="' + sw + '"/>' + arcs + '</g>' + labels + '</svg>' +
+         '<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:auto;padding-top:10px">' + legend + '</div>';
 }
 
 async function load() {
