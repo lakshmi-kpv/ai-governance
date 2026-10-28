@@ -62,7 +62,6 @@ td.barcell { width: 40%; white-space: normal; }
 
   <div class="card" style="margin-top:12px;padding:16px 18px">
     <div class="stat-label">Overall rating across submissions</div>
-    <div class="legend-inline" style="margin-top:8px"><span><i class="seg-early"></i>Early</span><span><i class="seg-dev"></i>Developing</span><span><i class="seg-est"></i>Established</span></div>
     <div id="overall-bar" class="barcell" style="margin-top:10px"></div>
       </div>
   <h2>By pillar</h2>
@@ -161,6 +160,28 @@ function jsonp(url) {
   });
 }
 
+function donut(o) {
+  const parts = [
+    { k: "Early", n: o.Early || 0, c: "#253B49" },
+    { k: "Developing", n: o.Developing || 0, c: "#8DBEEA" },
+    { k: "Established", n: o.Established || 0, c: "#0FB575" }
+  ];
+  const total = parts.reduce(function (s, p) { return s + p.n; }, 0);
+  if (!total) return '<p class="note">No rated submissions yet</p>';
+  const r = 56, C = 2 * Math.PI * r;
+  let off = 0;
+  const arcs = parts.filter(function (p) { return p.n; }).map(function (p) {
+    const len = p.n / total * C;
+    const s = '<circle cx="80" cy="80" r="' + r + '" fill="none" stroke="' + p.c + '" stroke-width="22" stroke-dasharray="' + len.toFixed(2) + ' ' + (C - len).toFixed(2) + '" stroke-dashoffset="' + (-off).toFixed(2) + '"><title>' + p.k + ': ' + p.n + ' of ' + total + '</title></circle>';
+    off += len;
+    return s;
+  }).join("");
+  const legend = parts.map(function (p) {
+    return '<div style="display:flex;align-items:center;gap:10px;font-size:15px"><i style="width:12px;height:12px;border-radius:50%;background:' + p.c + ';display:inline-block"></i><span style="min-width:110px">' + p.k + '</span><strong>' + Math.round(p.n / total * 100) + '%</strong></div>';
+  }).join("");
+  return '<div style="display:flex;align-items:center;gap:32px;flex-wrap:wrap"><svg width="170" height="170" viewBox="0 0 160 160" aria-hidden="true"><g transform="rotate(-90 80 80)"><circle cx="80" cy="80" r="' + r + '" fill="none" stroke="#EEF1F5" stroke-width="22"/>' + arcs + '</g></svg><div style="display:flex;flex-direction:column;gap:10px">' + legend + '</div></div>';
+}
+
 async function load() {
   try {
     const d = await jsonp(API_URL);
@@ -169,11 +190,7 @@ async function load() {
     document.getElementById("ov-early").textContent = d.overall.Early || 0;
     document.getElementById("ov-dev").textContent = d.overall.Developing || 0;
     document.getElementById("ov-est").textContent = d.overall.Established || 0;
-    document.getElementById("overall-bar").innerHTML = pctBar([
-      { n: d.overall.Early, cls: "seg-early", label: "Early" },
-      { n: d.overall.Developing, cls: "seg-dev", label: "Developing" },
-      { n: d.overall.Established, cls: "seg-est", label: "Established" }
-    ]);
+    document.getElementById("overall-bar").innerHTML = donut(d.overall);
 
     document.getElementById("pillars").innerHTML = PILLAR_ORDER.map((name) => {
       const c = d.pillars[name] || {};
